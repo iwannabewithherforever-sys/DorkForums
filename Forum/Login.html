@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link href="main.css" rel="stylesheet" type="text/css">
+        <title>Dorkbin - Login</title>
+    </head>
+    <body>
+        <h1>Dorkbin - Login</h1>
+        <form id="login-form">
+            <label for="username">Username:</label><br>
+            <input type="text" id="username" name="username"><br>
+            <label for="password">Password:</label><br>
+            <input type="password" id="password" name="password"><br><br>
+            <input type="submit" value="Login">
+        </form>
+        <script>
+            document.getElementById('login-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+                const response = await fetch('/.netlify/functions/login', {
+                    method: 'POST',
+                    body: JSON.stringify({ username, password }),
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    alert(data.message);
+                    window.location.href = data.redirect;
+                } else {
+                    alert(data.error);
+                }
+            });
+        </script>
+</html>

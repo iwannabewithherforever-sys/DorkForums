@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" type="text/css" href="main.css">
+    <title>Dorkbin - My Pastes</title>
+</head>
+<body>
+    <header>
+        <h1>Dorkbin</h1>
+        <nav>
+            <a href="Dorkbin.html">Home</a> | 
+            <a href="Login.html">Login</a> | 
+            <a href="Register.html">Register</a> | 
+            <a href="Settings.html">Settings</a> | 
+            <a href="AboutMe.html">About</a>
+        </nav>
+    </header>
+    <main>
+        <h1>My Pastes</h1>
+        <div id="my-pastes"></div>
+    </main>
+    <footer>
+        <p>&copy; 2026 Dorkbin. All rights reserved.</p>
+    </footer>
+    <script>
+        // Fetch user's pastes from backend
+        document.addEventListener('DOMContentLoaded', async function() {
+            const myPastesDiv = document.getElementById('my-pastes');
+            try {
+                const response = await fetch('/.netlify/functions/get-user-pastes');
+                const pastes = await response.json();
+                pastes.forEach(paste => {
+                    const pasteElement = document.createElement('div');
+                    pasteElement.classList.add('paste');
+                    pasteElement.innerHTML = `<h3>${paste.title}</h3><p>Author: ${paste.author} | Date: ${paste.date} | Views: ${paste.views}</p><pre>${paste.content}</pre><a href="#" class="read-more">Edit</a>`;
+                    myPastesDiv.appendChild(pasteElement);
+                });
+            } catch (error) {
+                console.error('Error loading pastes:', error);
+                myPastesDiv.innerHTML = '<p>Error loading pastes.</p>';
+            }
+        });
+    </script>
+</body>
+</html>
