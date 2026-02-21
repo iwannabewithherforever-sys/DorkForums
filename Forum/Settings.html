@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="main.css">
+    <title>Dorkbin - Settings</title>
+</head>
+<body>
+    <header>
+        <h1>Dorkbin</h1>
+        <nav>
+            <a href="Dorkbin.html">Home</a> |
+            <a href="Login.html">Login</a> |
+            <a href="Register.html">Register</a>
+        </nav>
+    </header>
+    <div class="container">
+        <main>
+            <section>
+                <h2>Settings</h2>
+                <p>Here you can adjust your account settings and preferences.</p>
+                <form id="settings-form">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email"><br><br>
+                    <label for="password">New Password:</label>
+                    <input type="password" id="password" name="password"><br><br>
+                    <label for="username">New Username:</label>
+                    <input type="text" id="username" name="username"><br><br>
+                    <label for="bio">Bio:</label>
+                    <textarea id="bio" name="bio" rows="3"></textarea><br><br>
+
+                    <label>Profile Picture (file only):</label><br>
+                    <input type="file" id="profile-pic-file" accept="image/*"><br>
+                    <img id="profile-pic-preview" src="" alt="Profile preview" style="display:none; max-width:120px; margin-top:8px; border-radius:4px;"><br><br>
+
+                    <label>Banner Image (file only):</label><br>
+                    <input type="file" id="banner-file" accept="image/*"><br>
+                    <img id="banner-preview" src="" alt="Banner preview" style="display:none; width:100%; max-height:120px; object-fit:cover; margin-top:8px;"><br><br>
+
+                    <input type="submit" value="Save Changes">
+                </form>
+            </section>
+        </main>
+    </div>
+    <footer>
+        <p>&copy; 2026 Dorkbin. All rights reserved.</p>
+    </footer>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const username = localStorage.getItem('username');
+            if (!username) {
+                alert('Please login first.');
+                window.location.href = 'Login.html';
+                return;
+            }
+
+            // Load current user data
+            const users = JSON.parse(localStorage.getItem('users')) || [];
+            const user = users.find(u => u.username === username);
+            if (user) {
+                document.getElementById('email').value = user.email || '';
+                document.getElementById('username').value = user.username;
+                document.getElementById('bio').value = user.bio || '';
+                // show previews if stored as data URLs
+                if (user.profilePic) {
+                    const pp = document.getElementById('profile-pic-preview');
+                    pp.src = user.profilePic;
+                    pp.style.display = 'block';
+                }
+                if (user.banner) {
+                    const bp = document.getElementById('banner-preview');
+                    bp.src = user.banner;
+                    bp.style.display = 'block';
+                }
+            }
+        });
+
+        document.getElementById('settings-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = localStorage.getItem('username');
+            const newUsername = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const email = document.getElementById('email').value;
+            const bio = document.getElementById('bio').value;
+            const profileFile = document.getElementById('profile-pic-file').files[0];
+            const bannerFile = document.getElementById('banner-file').files[0];
+
+            const maxProfileSize = 1 * 1024 * 1024; // 1MB
+            const maxBannerSize = 2 * 1024 * 1024; // 2MB
+
+            const users = JSON.parse(localStorage.getItem('users')) || [];
+            const userIndex = users.findIndex(u => u.username === username);
+
+            if (userIndex !== -1) {
+                if (newUsername !== username) {
+                    // Check if new username is taken
+                    const existing = users.find(u => u.username === newUsername);
+                    if (existing) {
+                        alert('Username already taken.');
+                        return;
+                    }
+                    // Update pastes author
+                    const pastes = JSON.parse(localStorage.getItem('pastes')) || [];
+                    pastes.forEach(p => {
+                        if (p.author === username) p.author = newUsername;
+                    });
+                    localStorage.setItem('pastes', JSON.stringify(pastes));
+                    localStorage.setItem('username', newUsername);
+                }
+
+                users[userIndex].username = newUsername;
+                if (password) users[userIndex].password = password;
+                users[userIndex].email = email;
+                users[userIndex].bio = bio;
+
+                // helper to read file as data URL
+                function readFileAsDataURL(file) {
+                    return new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onload = () => resolve(reader.result);
+                        reader.onerror = () => reject(new Error('File read error'));
+                        reader.readAsDataURL(file);
+                    });
+                }
+
+                (async function processFiles() {
+                    try {
+                        if (profileFile) {
+                            if (!profileFile.type.startsWith('image/')) { alert('Profile picture must be an image file.'); return; }
+                            if (profileFile.size > maxProfileSize) { alert('Profile picture too large (max 1MB).'); return; }
+                            const dataUrl = await readFileAsDataURL(profileFile);
+                            users[userIndex].profilePic = dataUrl;
+                        }
+                        if (bannerFile) {
+                            if (!bannerFile.type.startsWith('image/')) { alert('Banner must be an image file.'); return; }
+                            if (bannerFile.size > maxBannerSize) { alert('Banner too large (max 2MB).'); return; }
+                            const dataUrl = await readFileAsDataURL(bannerFile);
+                            users[userIndex].banner = dataUrl;
+                        }
+
+                        localStorage.setItem('users', JSON.stringify(users));
+                        alert('Settings saved successfully!');
+                        window.location.href = 'Dorkbin.html';
+                    } catch (err) {
+                        console.error(err);
+                        alert('Error processing image files.');
+                    }
+                })();
+            } else {
+                alert('User not found.');
+            }
+        });
+
+        // Preview file inputs
+        document.getElementById('profile-pic-file').addEventListener('change', function(e) {
+            const f = e.target.files[0];
+            if (f && f.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    const pp = document.getElementById('profile-pic-preview');
+                    pp.src = reader.result;
+                    pp.style.display = 'block';
+                };
+                reader.readAsDataURL(f);
+            } else {
+                const pp = document.getElementById('profile-pic-preview');
+                pp.src = '';
+                pp.style.display = 'none';
+            }
+        });
+
+        document.getElementById('banner-file').addEventListener('change', function(e) {
+            const f = e.target.files[0];
+            if (f && f.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    const bp = document.getElementById('banner-preview');
+                    bp.src = reader.result;
+                    bp.style.display = 'block';
+                };
+                reader.readAsDataURL(f);
+            } else {
+                const bp = document.getElementById('banner-preview');
+                bp.src = '';
+                bp.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

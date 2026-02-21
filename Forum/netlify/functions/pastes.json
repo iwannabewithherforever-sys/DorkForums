@@ -1,0 +1,32 @@
+[
+  {
+    "id": "1",
+    "title": "Welcome to Dorkbin",
+    "content": "Welcome to Dorkbin! Share your code snippets and pastes here.",
+    "author": "Zed",
+    "category": "General",
+    "date": "2026-02-21",
+    "views": 150,
+    "created_at": "2026-02-21T10:00:00Z"
+  },
+  {
+    "id": "2",
+    "title": "Sample Paste 1",
+    "content": "This is a sample paste to demonstrate functionality.",
+    "author": "You",
+    "category": "Code",
+    "date": "2026-02-20",
+    "views": 89,
+    "created_at": "2026-02-20T15:30:00Z"
+  },
+  {
+    "id": "3",
+    "title": "Sample Paste 2",
+    "content": "Another paste example with some content.",
+    "author": "You",
+    "category": "Text",
+    "date": "2026-02-19",
+    "views": 25,
+    "created_at": "2026-02-19T12:00:00Z"
+  }
+]

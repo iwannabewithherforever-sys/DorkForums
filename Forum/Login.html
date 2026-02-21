@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="main.css">
+    <title>Dorkbin - Login</title>
+</head>
+<body>
+    <header>
+        <h1>Dorkbin</h1>
+        <nav>
+            <a href="Dorkbin.html">Home</a> |
+            <a href="Register.html">Register</a>
+        </nav>
+    </header>
+    <div class="container">
+        <main>
+            <section>
+                <h2>Login</h2>
+                <form id="login-form">
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" name="username" required><br><br>
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password" required><br><br>
+                    <input type="submit" value="Login">
+                </form>
+            </section>
+        </main>
+    </div>
+    <footer>
+        <p>&copy; 2026 Dorkbin. All rights reserved.</p>
+    </footer>
+    <script>
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            try {
+                const users = JSON.parse(localStorage.getItem('users')) || [];
+                const user = users.find(u => u.username === username && u.password === password);
+                if (user) {
+                    alert('Login successful');
+                    localStorage.setItem('username', username);
+                    window.location.href = 'Dorkbin.html';
+                } else {
+                    alert('Invalid credentials');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                alert('Login failed');
+            }
+        });
+    </script>
+</body>
+</html>

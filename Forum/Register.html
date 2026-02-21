@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="main.css">
+    <title>Dorkbin - Register</title>
+</head>
+<body>
+    <header>
+        <h1>Dorkbin</h1>
+        <nav>
+            <a href="Dorkbin.html">Home</a> |
+            <a href="Login.html">Login</a>
+        </nav>
+    </header>
+    <div class="container">
+        <main>
+            <section>
+                <h2>Register</h2>
+                <form id="register-form">
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" name="username" required><br><br>
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password" required><br><br>
+                    <input type="submit" value="Register">
+                </form>
+            </section>
+        </main>
+    </div>
+    <footer>
+        <p>&copy; 2026 Dorkbin. All rights reserved.</p>
+    </footer>
+    <script>
+        document.getElementById('register-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            try {
+                let users = JSON.parse(localStorage.getItem('users')) || [];
+                const existingUser = users.find(user => user.username === username);
+                if (existingUser) {
+                    alert('Username already exists');
+                    return;
+                }
+                users.push({ username, password });
+                localStorage.setItem('users', JSON.stringify(users));
+                alert('Registration successful');
+                window.location.href = 'Login.html';
+            } catch (error) {
+                console.error('Registration error:', error);
+                alert('Registration failed');
+            }
+        });
+    </script>
+</body>
+</html>

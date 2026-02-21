@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="main.css">
+    <title>Dorkbin - Add Paste</title>
+</head>
+<body>
+    <header>
+        <h1>Dorkbin</h1>
+        <nav>
+            <a href="index.html">Home</a> |
+            <a href="Login.html">Login</a> |
+            <a href="Register.html">Register</a>
+        </nav>
+    </header>
+    <div class="container">
+        <main>
+            <section id="add-paste-section">
+                <h2>Create a New Paste</h2>
+                <form id="paste-form">
+                    <label for="title">Title:</label>
+                    <input type="text" id="title" name="title" required><br><br>
+                    
+                    <label for="content">Content:</label><br>
+                    <textarea id="content" name="content" rows="20" required></textarea><br><br>
+                    
+                    <label for="password">Password (optional):</label>
+                    <input type="password" id="password" name="password"><br><br>
+                    
+                    <input type="submit" value="Create Paste">
+                </form>
+                <div id="message"></div>
+            </section>
+        </main>
+    </div>
+    <footer>
+        <p>&copy; 2026 Dorkbin. All rights reserved.</p>
+    </footer>
+    <script>
+        document.getElementById('paste-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const title = document.getElementById('title').value;
+            const content = document.getElementById('content').value;
+            const password = document.getElementById('password').value;
+            const messageDiv = document.getElementById('message');
+
+            if (!title || !content) {
+                messageDiv.innerHTML = '<p style="color: red;">Please fill in all fields.</p>';
+                return;
+            }
+
+            try {
+                const username = localStorage.getItem('username') || 'Anonymous';
+                const paste = {
+                    id: Date.now().toString(),
+                    title,
+                    content,
+                    author: username,
+                    date: new Date().toISOString().split('T')[0],
+                    views: 0,
+                    password: password || null,
+                    created_at: new Date().toISOString(),
+                };
+
+                // Save to localStorage
+                let pastes = JSON.parse(localStorage.getItem('pastes')) || [];
+                pastes.push(paste);
+                localStorage.setItem('pastes', JSON.stringify(pastes));
+
+                messageDiv.innerHTML = '<p style="color: green;">Paste created successfully! Redirecting...</p>';
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 1500);
+            } catch (error) {
+                console.error('Error creating paste:', error);
+                messageDiv.innerHTML = '<p style="color: red;">Failed to create paste. Please try again.</p>';
+            }
+        });
+    </script>
+</body>
+</html>

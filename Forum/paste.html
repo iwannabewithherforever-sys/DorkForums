@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="main.css">
+    <title>Dorkbin - Paste</title>
+</head>
+<body>
+    <header>
+        <h1>Dorkbin</h1>
+        <nav>
+            <a href="index.html">Home</a> |
+            <a href="Login.html">Login</a> |
+            <a href="Register.html">Register</a>
+        </nav>
+    </header>
+    <div class="container">
+        <main>
+            <section id="paste-view">
+                <div id="paste-content"></div>
+            </section>
+        </main>
+    </div>
+    <footer>
+        <p>&copy; 2026 Dorkbin. All rights reserved.</p>
+    </footer>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const pasteId = urlParams.get('id');
+
+        if (pasteId) {
+            try {
+                const pastes = JSON.parse(localStorage.getItem('pastes')) || [];
+                const paste = pastes.find(p => p.id === pasteId);
+                if (paste) {
+                    if (paste.password) {
+                        const enteredPassword = prompt('This paste is password protected. Enter password:');
+                        if (enteredPassword !== paste.password) {
+                            document.getElementById('paste-content').innerHTML = '<p>Incorrect password.</p>';
+                            return;
+                        }
+                    }
+                    document.getElementById('paste-content').innerHTML = `
+                        <h2>${paste.title}</h2>
+                        <p>Author: ${paste.author} | Date: ${paste.date} | Views: ${paste.views}</p>
+                        <pre>${paste.content}</pre>
+                    `;
+                    // Increment views
+                    paste.views++;
+                    localStorage.setItem('pastes', JSON.stringify(pastes));
+                } else {
+                    document.getElementById('paste-content').innerHTML = '<p>Paste not found.</p>';
+                }
+            } catch (error) {
+                console.error('Error loading paste:', error);
+                document.getElementById('paste-content').innerHTML = '<p>Error loading paste.</p>';
+            }
+        } else {
+            document.getElementById('paste-content').innerHTML = '<p>No paste ID provided.</p>';
+        }
+    </script>
+</body>
+</html>

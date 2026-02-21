@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="main.css">
+    <title>Dorkbin - Profile</title>
+</head>
+<body>
+    <header>
+        <h1>Dorkbin</h1>
+        <nav>
+            <a href="Dorkbin.html">Home</a> |
+            <a href="Login.html">Login</a> |
+            <a href="Register.html">Register</a> |
+            <a href="Settings.html">Settings</a>
+        </nav>
+    </header>
+    <div class="container">
+        <main>
+            <div id="banner"></div>
+            <section id="profile-info">
+                <h2 id="profile-title">User Information</h2>
+                <img id="avatar" src="" alt="Avatar" class="avatar" style="display:none;">
+                <p>Username: <span id="username">Loading...</span></p>
+                <p>Total Pastes: <span id="total-pastes">0</span></p>
+                <div id="bio"></div>
+            </section>
+            <section id="my-pastes">
+                <h2 id="pastes-title">Pastes</h2>
+                <div id="pastes-list"></div>
+            </section>
+            <section id="comments">
+                <h2>Comments</h2>
+                <div id="comments-list"></div>
+                <input type="text" id="comment-input" placeholder="Add a comment...">
+                <button id="add-comment">Comment</button>
+            </section>
+        </main>
+    </div>
+    <footer>
+        <p>&copy; 2026 Dorkbin. All rights reserved.</p>
+    </footer>
+    <script>
+        document.addEventListener('DOMContentLoaded', async function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const profileUsername = urlParams.get('user') || localStorage.getItem('username');
+            const isOwnProfile = !urlParams.get('user') || profileUsername === localStorage.getItem('username');
+
+            if (!profileUsername) {
+                alert('Please login first.');
+                window.location.href = 'Login.html';
+                return;
+            }
+
+            const usernameSpan = document.getElementById('username');
+            const totalPastesSpan = document.getElementById('total-pastes');
+            const pastesListDiv = document.getElementById('pastes-list');
+            const bioDiv = document.getElementById('bio');
+            const bannerDiv = document.getElementById('banner');
+
+            try {
+                // Load user data
+                const users = JSON.parse(localStorage.getItem('users')) || [];
+                const user = users.find(u => u.username === profileUsername);
+                if (user) {
+                    const className = user.rank === 'EXTORT' ? 'led-text-red' : 'led-text';
+                    const rankDisplay = user.rank ? `<span class="${className}">[${user.rank}]</span> ` : '';
+                    usernameSpan.innerHTML = `${rankDisplay}${user.username}`;
+                    document.getElementById('profile-title').textContent = isOwnProfile ? 'My Profile' : `${user.username}'s Profile`;
+                    if (user.bio) bioDiv.innerHTML = `<h3>Bio</h3><p>${user.bio}</p>`;
+                    if (user.banner) bannerDiv.innerHTML = `<img src="${user.banner}" alt="Banner" style="width:100%; max-height:200px;">`;
+                    if (user.profilePic) {
+                        const av = document.getElementById('avatar');
+                        av.src = user.profilePic;
+                        av.style.display = 'block';
+                    }
+                } else {
+                    usernameSpan.textContent = profileUsername;
+                    document.getElementById('profile-title').textContent = `${profileUsername}'s Profile`;
+                }
+
+                const pastes = JSON.parse(localStorage.getItem('pastes')) || [];
+                const userPastes = pastes.filter(p => p.author === profileUsername);
+                document.getElementById('pastes-title').textContent = isOwnProfile ? 'My Pastes' : `${profileUsername}'s Pastes`;
+
+                userPastes.forEach(paste => {
+                    const pasteDiv = document.createElement('div');
+                    pasteDiv.classList.add('paste');
+                    pasteDiv.innerHTML = `
+                        <h3><a href="#" class="paste-link" data-id="${paste.id}">${paste.title}</a></h3>
+                        <p>Date: ${paste.date} | Views: ${paste.views}</p>
+                        <div class="paste-content" style="display: none;">
+                            <pre>${paste.content}</pre>
+                            <div class="paste-comments">
+                                <h4>Comments</h4>
+                                <div class="comments-list" data-paste-id="${paste.id}"></div>
+                                <input type="text" class="comment-input" placeholder="Add a comment...">
+                                <button class="add-comment-btn" data-paste-id="${paste.id}">Comment</button>
+                            </div>
+                        </div>
+                    `;
+                    pastesListDiv.appendChild(pasteDiv);
+                });
+
+                // Load comments
+                const profileComments = JSON.parse(localStorage.getItem('profileComments')) || {};
+                const comments = profileComments[profileUsername] || [];
+                const commentsListDiv = document.getElementById('comments-list');
+                comments.forEach(comment => {
+                    const commentDiv = document.createElement('div');
+                    commentDiv.classList.add('comment');
+                    commentDiv.innerHTML = `<strong>${comment.author}:</strong> ${comment.text} <em>(${new Date(comment.date).toLocaleString()})</em>`;
+                    commentsListDiv.appendChild(commentDiv);
+                });
+
+                // Add comment functionality
+                document.getElementById('add-comment').addEventListener('click', function() {
+                    const commentText = document.getElementById('comment-input').value.trim();
+                    if (commentText !== '') {
+                        const comment = { author: localStorage.getItem('username') || 'Anonymous', text: commentText, date: Date.now() };
+                        comments.push(comment);
+                        profileComments[profileUsername] = comments;
+                        localStorage.setItem('profileComments', JSON.stringify(profileComments));
+                        // Add to display
+                        const commentDiv = document.createElement('div');
+                        commentDiv.classList.add('comment');
+                        commentDiv.innerHTML = `<strong>${comment.author}:</strong> ${comment.text} <em>(${new Date(comment.date).toLocaleString()})</em>`;
+                        commentsListDiv.appendChild(commentDiv);
+                        document.getElementById('comment-input').value = '';
+                    }
+                });
+
+                // Load paste comments
+                const pasteComments = JSON.parse(localStorage.getItem('pasteComments')) || {};
+                document.querySelectorAll('.comments-list').forEach(list => {
+                    const pasteId = list.getAttribute('data-paste-id');
+                    const comments = pasteComments[pasteId] || [];
+                    comments.forEach(comment => {
+                        const commentDiv = document.createElement('div');
+                        commentDiv.classList.add('comment');
+                        commentDiv.innerHTML = `<strong>${comment.author}:</strong> ${comment.text} <em>(${new Date(comment.date).toLocaleString()})</em>`;
+                        list.appendChild(commentDiv);
+                    });
+                });
+
+                // Add event listeners for paste comments
+                document.querySelectorAll('.add-comment-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const pasteId = this.getAttribute('data-paste-id');
+                        const input = this.previousElementSibling;
+                        const commentText = input.value.trim();
+                        if (commentText !== '') {
+                            const comment = { author: localStorage.getItem('username') || 'Anonymous', text: commentText, date: Date.now() };
+                            if (!pasteComments[pasteId]) pasteComments[pasteId] = [];
+                            pasteComments[pasteId].push(comment);
+                            localStorage.setItem('pasteComments', JSON.stringify(pasteComments));
+                            // Add to display
+                            const list = document.querySelector(`.comments-list[data-paste-id="${pasteId}"]`);
+                            const commentDiv = document.createElement('div');
+                            commentDiv.classList.add('comment');
+                            commentDiv.innerHTML = `<strong>${comment.author}:</strong> ${comment.text} <em>(${new Date(comment.date).toLocaleString()})</em>`;
+                            list.appendChild(commentDiv);
+                            input.value = '';
+                        }
+                    });
+                });
+
+                // Add event listeners to toggle content
+                document.querySelectorAll('.paste-link').forEach(link => {
+                    link.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        const pasteId = this.getAttribute('data-id');
+                        const paste = pastes.find(p => p.id === pasteId);
+                        if (paste.password && !isOwnProfile) {
+                            const enteredPassword = prompt('This paste is password protected. Enter password:');
+                            if (enteredPassword !== paste.password) {
+                                alert('Incorrect password.');
+                                return;
+                            }
+                        }
+                        const contentDiv = this.parentElement.nextElementSibling.nextElementSibling;
+                        if (contentDiv.style.display === 'none') {
+                            // Increment views
+                            paste.views++;
+                            localStorage.setItem('pastes', JSON.stringify(pastes));
+                            // Update display
+                            this.parentElement.nextElementSibling.innerHTML = `Date: ${paste.date} | Views: ${paste.views}`;
+                        }
+                        contentDiv.style.display = contentDiv.style.display === 'none' ? 'block' : 'none';
+                    });
+                });
+
+            } catch (error) {
+                console.error('Error loading profile:', error);
+                pastesListDiv.innerHTML = '<p>Error loading pastes.</p>';
+            }
+        });
+    </script>
+</body>
+</html>

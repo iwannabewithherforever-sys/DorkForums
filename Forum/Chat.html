@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="main.css">
+    <title>Dorkbin - Chat</title>
+</head>
+<body>
+    <header>
+        <h1>Dorkbin</h1>
+        <nav>
+            <a href="Dorkbin.html">Home</a> |
+            <a href="Login.html">Login</a> |
+            <a href="Register.html">Register</a>
+        </nav>
+    </header>
+    <div class="container">
+        <main>
+            <section>
+                <h2>Chat</h2>
+                <textarea id="chatbox" rows="20" readonly></textarea><br><br>
+                <input type="text" id="message" placeholder="Type your message here...">
+                <button id="send">Send</button>
+            </section>
+        </main>
+    </div>
+    <footer>
+        <p>&copy; 2026 Dorkbin. All rights reserved.</p>
+    </footer>
+    <script>
+        const chatbox = document.getElementById('chatbox');
+        const messageInput = document.getElementById('message');
+        const sendButton = document.getElementById('send');
+        const username = localStorage.getItem('username') || 'Anonymous';
+
+        // Load existing messages
+        let messages = JSON.parse(localStorage.getItem('chatMessages')) || [];
+        messages.forEach(msg => {
+            chatbox.value += `${msg.author}: ${msg.text}\n`;
+        });
+
+        // BroadcastChannel for real-time
+        const channel = new BroadcastChannel('dorkbin-chat');
+        channel.onmessage = function(event) {
+            const msg = event.data;
+            chatbox.value += `${msg.author}: ${msg.text}\n`;
+            chatbox.scrollTop = chatbox.scrollHeight;
+        };
+
+        sendButton.addEventListener('click', function() {
+            const text = messageInput.value.trim();
+            if (text !== '') {
+                const msg = { author: username, text: text, timestamp: Date.now() };
+                messages.push(msg);
+                localStorage.setItem('chatMessages', JSON.stringify(messages));
+                channel.postMessage(msg);
+                messageInput.value = '';
+            }
+        });
+    </script>
+</body>
+</html>

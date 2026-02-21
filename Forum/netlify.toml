@@ -1,0 +1,43 @@
+[[redirects]]
+  from = "/"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/dorkbin"
+  to = "/Dorkbin.html"
+  status = 200
+
+[[redirects]]
+  from = "/login"
+  to = "/Login.html"
+  status = 200
+
+[[redirects]]
+  from = "/register"
+  to = "/Register.html"
+  status = 200
+
+[[redirects]]
+  from = "/my-pastes"
+  to = "/MyPastes.html"
+  status = 200
+
+[[redirects]]
+  from = "/settings"
+  to = "/Settings.html"
+  status = 200
+
+[[redirects]]
+  from = "/about"
+  to = "/AboutMe.html"
+  status = 200
+
+[[redirects]]
+  from = "/profile"
+  to = "/Profile.html"
+  status = 200
+
+[build]
+  publish = "."
+  functions = "netlify/functions"
