@@ -1,9 +1,0 @@
-{
-  "name": "dorkbin-forum",
-  "version": "1.0.0",
-  "description": "A pastebin forum site",
-  "scripts": {
-    "build": "echo 'No build step required'"
-  },
-  "dependencies": {}
-}
